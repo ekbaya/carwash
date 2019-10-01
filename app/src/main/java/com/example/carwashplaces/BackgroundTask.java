@@ -1,7 +1,5 @@
 package com.example.carwashplaces;
-
 import android.content.Context;
-import android.content.Intent;
 import android.widget.Toast;
 
 
@@ -39,35 +37,36 @@ public class BackgroundTask {
                            try {
                                JSONObject jsonObject = response.getJSONObject(count);
                                ModelLocation modelLocation = new ModelLocation(
-                                       jsonObject.getString("id"),
                                        jsonObject.getString("name"),
+                                       jsonObject.getString("staff"),
                                        jsonObject.getString("latitude"),
                                        jsonObject.getString("longitude"),
-                                       jsonObject.getString("staff"),
-                                       jsonObject.getString("comment"),
-                                       jsonObject.getString("phone"));
+                                       jsonObject.getString("id"),
+                                       jsonObject.getString("phone"),
+                                       jsonObject.getString("comment"));
                                locationArrayList.add(modelLocation);
                                count++;
 
                            } catch (JSONException e) {
                                e.printStackTrace();
                            }
+
                        }
 
+                        ArrayList<ModelLocation> locations = locationArrayList;
+                        locationCallback.onSuccess(locations);
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
 
-                Toast.makeText(context, "Error fetching car wash places...  ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Error fetching car wash places...", Toast.LENGTH_LONG).show();
                 error.printStackTrace();
             }
         });
 
         MySingleton.getInstance(context).addToRequestque(jsonArrayRequest);
 
-        ArrayList<ModelLocation> locations = locationArrayList;
-        locationCallback.onSuccess(locations);
-        return locations;
+        return locationArrayList;
     }
 }

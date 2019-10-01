@@ -2,9 +2,8 @@ package com.example.carwashplaces;
 
 import android.content.Intent;
 import android.content.IntentSender;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 
 import com.google.android.gms.common.api.ApiException;
@@ -21,7 +20,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -39,31 +37,30 @@ import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.mancj.materialsearchbar.MaterialSearchBar;
 import com.mancj.materialsearchbar.adapter.SuggestionsAdapter;
 import com.skyfishjy.library.RippleBackground;
 
+import androidx.activity.OnBackPressedDispatcherOwner;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -79,8 +76,17 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private LocationCallback locationCallback;
 
     private MaterialSearchBar materialSearchBar;
+
+    //views
     private View mapView;
-    private Button btnFind;
+    private Button btnFind, directionBtn, navigationBtn, callBtn;
+    private ImageButton closeBtn;
+    private TextView nameTv, staffNameTv, descriptionTv;
+    private LinearLayout infoBottomSheet;
+
+
+
+
     private RippleBackground rippleBg;
 
     private final float DEFAULT_ZOOM = 18;
@@ -94,7 +100,18 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         //init views
         materialSearchBar = findViewById(R.id.searchBar);
         btnFind = findViewById(R.id.btnFind);
+        directionBtn = findViewById(R.id.directionBtn);
+        navigationBtn = findViewById(R.id.navigationBtn);
+        callBtn = findViewById(R.id.callBtn);
+        closeBtn = findViewById(R.id.closeBtn);
+        nameTv = findViewById(R.id.nameTv);
+        staffNameTv = findViewById(R.id.staffNameTv);
+        descriptionTv = findViewById(R.id.descriptionTv);
+        infoBottomSheet = findViewById(R.id.infoBottomSheet);
         rippleBg = findViewById(R.id.ripple_bg);
+
+        //Hide information window
+        infoBottomSheet.setVisibility(View.GONE);
 
         //Fetching locations array
         locations = new ArrayList<>();
@@ -103,16 +120,18 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public void onSuccess(ArrayList<ModelLocation> fetchedLocations) {
                 locations = fetchedLocations;
+
+
+                SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+                mapFragment.getMapAsync(MapActivity.this);
+                mapView = mapFragment.getView();
+
+                mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(MapActivity.this);
+                Places.initialize(MapActivity.this, "AIzaSyBozgdcoXc0xTs3jcqUvx4oJIh2af1tjuY");
+                placesClient = Places.createClient(MapActivity.this);
             }
         });
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-        mapView = mapFragment.getView();
-
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(MapActivity.this);
-        Places.initialize(MapActivity.this, "AIzaSyBozgdcoXc0xTs3jcqUvx4oJIh2af1tjuY");
-        placesClient = Places.createClient(this);
         final AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
 
         materialSearchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
@@ -150,33 +169,35 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         .setSessionToken(token)
                         .setQuery(s.toString())
                         .build();
-                placesClient.findAutocompletePredictions(predictionsRequest).addOnCompleteListener(new OnCompleteListener<FindAutocompletePredictionsResponse>() {
-                    @Override
-                    public void onComplete(@NonNull Task<FindAutocompletePredictionsResponse> task) {
-                        if (task.isSuccessful()){
-                            //predictions found, find out what suggestions we have from google
-                            FindAutocompletePredictionsResponse predictionsResponse = task.getResult();
-                            if (predictionsResponse != null){
-                                predictionList = predictionsResponse.getAutocompletePredictions();
-                                //converting predictionList into a list of string
-                                List<String> suggestionsList = new ArrayList<>();
-                                for (int i = 0; i < predictionList.size(); i++){
-                                    AutocompletePrediction prediction = predictionList.get(i);
-                                    suggestionsList.add(prediction.getFullText(null).toString());
-                                }
-                                //pass suggestion list to our MaterialSearchBar
-                                materialSearchBar.updateLastSuggestions(suggestionsList);
-                                if (!materialSearchBar.isSuggestionsVisible()){
-                                    materialSearchBar.showSuggestionsList();
+                if (placesClient != null){
+                    placesClient.findAutocompletePredictions(predictionsRequest).addOnCompleteListener(new OnCompleteListener<FindAutocompletePredictionsResponse>() {
+                        @Override
+                        public void onComplete(@NonNull Task<FindAutocompletePredictionsResponse> task) {
+                            if (task.isSuccessful()){
+                                //predictions found, find out what suggestions we have from google
+                                FindAutocompletePredictionsResponse predictionsResponse = task.getResult();
+                                if (predictionsResponse != null){
+                                    predictionList = predictionsResponse.getAutocompletePredictions();
+                                    //converting predictionList into a list of string
+                                    List<String> suggestionsList = new ArrayList<>();
+                                    for (int i = 0; i < predictionList.size(); i++){
+                                        AutocompletePrediction prediction = predictionList.get(i);
+                                        suggestionsList.add(prediction.getFullText(null).toString());
+                                    }
+                                    //pass suggestion list to our MaterialSearchBar
+                                    materialSearchBar.updateLastSuggestions(suggestionsList);
+                                    if (!materialSearchBar.isSuggestionsVisible()){
+                                        materialSearchBar.showSuggestionsList();
+                                    }
                                 }
                             }
+                            else {
+                                //some error
+                                Log.i("mytag", "prediction fetching task failed");
+                            }
                         }
-                        else {
-                            //some error
-                            Log.i("mytag", "prediction fetching task failed");
-                        }
-                    }
-                });
+                    });
+                }
             }
 
             @Override
@@ -246,16 +267,18 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         btnFind.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //get the current location of the marker
-                LatLng currentMarkerLocation = mMap.getCameraPosition().target;
-                rippleBg.startRippleAnimation();
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        rippleBg.stopRippleAnimation();
-                        Toast.makeText(MapActivity.this, "Nearest Car Wash", Toast.LENGTH_SHORT).show();
-                    }
-                },3000);
+                if (mMap != null){
+                    //get the current location of the marker
+                    LatLng currentMarkerLocation = mMap.getCameraPosition().target;
+                    rippleBg.startRippleAnimation();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            rippleBg.stopRippleAnimation();
+                            Toast.makeText(MapActivity.this, "Nearest Car Wash", Toast.LENGTH_SHORT).show();
+                        }
+                    },3000);
+                }
             }
         });
 
@@ -334,9 +357,45 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
                 //set markers to a car wash places
                 mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(latitude, longitude))
-                .title(locations.get(i).getName())
-                .snippet(locations.get(i).getComment()));
+                        .position(new LatLng(latitude, longitude))).setTag(i);
+
+                //Handling marker on clicks listener
+                mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(Marker marker) {
+                        infoBottomSheet.setVisibility(View.VISIBLE);
+                        btnFind.setVisibility(View.GONE);
+
+                            final int position = (int) marker.getTag();
+                            String name = locations.get(position).getName();
+                            String staff = locations.get(position).getStaff();
+                            String description = locations.get(position).getComment();
+
+                            nameTv.setText(name);
+                            staffNameTv.setText("Staff: "+staff);
+                            descriptionTv.setText("About: "+description);
+
+                            //Handling call button click
+                            callBtn.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    String phone = locations.get(position).getPhone();
+                                    startActivity(new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", "0"+phone, null)));
+                                }
+                            });
+
+                        //Handling close button click
+                            closeBtn.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    infoBottomSheet.setVisibility(View.GONE);
+                                    btnFind.setVisibility(View.VISIBLE);
+                                }
+                            });
+
+                        return false;
+                    }
+                });
             }
         }
     }
