@@ -16,6 +16,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        targetCompatibility = 1.8
+        sourceCompatibility = 1.8
+    }
 }
 
 dependencies {
@@ -27,10 +31,23 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
+    //dialog for location permission
     implementation 'com.karumi:dexter:5.0.0'
+    //search bar
     implementation 'com.github.mancj:MaterialSearchBar:0.8.1'
+    //Ripple background
     implementation 'com.skyfishjy.ripplebackground:library:1.0.1'
+
     implementation 'com.google.android.gms:play-services-maps:16.1.0'
     implementation 'com.google.android.libraries.places:places:1.1.0'
+
+    //Directions
+    implementation 'com.google.maps:google-maps-services:0.10.1'
+    implementation 'org.slf4j:slf4j-simple:1.7.25'
+
+    //google diection libray
+    implementation 'com.akexorcist:googledirectionlibrary:1.1.1'
+
+    //Volley library
     implementation 'com.android.volley:volley:1.1.0'
 }
