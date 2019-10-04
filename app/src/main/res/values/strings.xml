@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">Car Wash Places</string>
     <string name="title_activity_map">MapActivity</string>
-    <string name="google_maps_api_key"></string>
+    <string name="google_maps_api_key">AIzaSyBozgdcoXc0xTs3jcqUvx4oJIh2af1tjuY</string>
 </resources>

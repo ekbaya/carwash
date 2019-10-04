@@ -334,7 +334,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         //move camera to current location
         if (mClosestMarker != null){
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mClosestMarker.getPosition().latitude, mClosestMarker.getPosition().longitude), 18));
-            Toast.makeText(MapActivity.this, "Closest Car Wash Distance: "+ mClosestMarker.getTitle() + " " + distanceKm+" Km", Toast.LENGTH_LONG).show();
+            Toast.makeText(MapActivity.this, "Nearest Car Wash and Distance: "+ mClosestMarker.getTitle() + " " + distanceKm+" Km", Toast.LENGTH_LONG).show();
         }
         else {
             Toast.makeText(this, "Error getting the nearest Car Wash...", Toast.LENGTH_SHORT).show();
