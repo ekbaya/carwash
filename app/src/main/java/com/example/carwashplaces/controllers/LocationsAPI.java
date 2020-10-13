@@ -9,7 +9,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.example.carwashplaces.services.LocationCallback;
 import com.example.carwashplaces.utils.MySingleton;
-import com.example.carwashplaces.models.ModelLocation;
+import com.example.carwashplaces.models.Location;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,14 +19,14 @@ import java.util.ArrayList;
 
 public class LocationsAPI {
     private Context context;
-    private ArrayList<ModelLocation> locationArrayList = new ArrayList<>();
+    private ArrayList<Location> locationArrayList = new ArrayList<>();
     String json_url = "http://histogenetic-exhaus.000webhostapp.com/location.php";
 
     public LocationsAPI(Context context) {
         this.context = context;
     }
 
-    public ArrayList<ModelLocation> getLocationArrayList(final LocationCallback locationCallback){
+    public ArrayList<Location> getLocationArrayList(final LocationCallback locationCallback){
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest (
                 Request.Method.POST,
                 json_url,
@@ -39,7 +39,7 @@ public class LocationsAPI {
 
                            try {
                                JSONObject jsonObject = response.getJSONObject(count);
-                               ModelLocation modelLocation = new ModelLocation(
+                               Location location = new Location(
                                        jsonObject.getString("name"),
                                        jsonObject.getString("staff"),
                                        jsonObject.getString("latitude"),
@@ -47,7 +47,7 @@ public class LocationsAPI {
                                        jsonObject.getString("id"),
                                        jsonObject.getString("phone"),
                                        jsonObject.getString("comment"));
-                               locationArrayList.add(modelLocation);
+                               locationArrayList.add(location);
                                count++;
 
                            } catch (JSONException e) {
@@ -56,7 +56,7 @@ public class LocationsAPI {
 
                        }
 
-                        ArrayList<ModelLocation> locations = locationArrayList;
+                        ArrayList<Location> locations = locationArrayList;
                         locationCallback.onSuccess(locations);
                     }
                 }, new Response.ErrorListener() {

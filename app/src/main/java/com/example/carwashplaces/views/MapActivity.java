@@ -6,7 +6,6 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -39,7 +38,7 @@ import com.akexorcist.googledirection.model.Leg;
 import com.akexorcist.googledirection.model.Route;
 import com.example.carwashplaces.R;
 import com.example.carwashplaces.controllers.LocationsAPI;
-import com.example.carwashplaces.models.ModelLocation;
+import com.example.carwashplaces.models.Location;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -93,10 +92,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private GeoApiContext geoApiContext = null;
     private Polyline polyline;
     private Marker textBubble;
-    private Location mLastKnownLocation;
+    private android.location.Location mLastKnownLocation;
 
     private List<AutocompletePrediction> predictionList;
-    private ArrayList<ModelLocation> locations;
+    private ArrayList<Location> locations;
     private LocationsAPI locationsAPI;
 
 
@@ -114,7 +113,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private ProgressDialog progressDialog;
     private RippleBackground rippleBg;
     private final float DEFAULT_ZOOM = 18;
-
     private AutocompleteSessionToken token;
 
 
@@ -171,7 +169,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     }
 
-    private void getNearestMarkerFromCurrentLocation(ArrayList<ModelLocation> places, LatLng currentMarkerLocation) {
+    private void getNearestMarkerFromCurrentLocation(ArrayList<Location> places, LatLng currentMarkerLocation) {
         Marker mClosestMarker = null;
         float minDist = 0;
 
@@ -190,7 +188,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             );
 
             float[] distance = new float[1];
-            Location.distanceBetween(currentMarkerLocation.latitude, currentMarkerLocation.longitude, lat, lon, distance);
+            android.location.Location.distanceBetween(currentMarkerLocation.latitude, currentMarkerLocation.longitude, lat, lon, distance);
             if (i == 0) {
                 minDist = distance[0];
             } else if (minDist > distance[0]) {
@@ -321,7 +319,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     });
 
                     //Handling direction button click
-                    directionBtn.setOnClickListener(v -> calculateDirections(position));
+                    directionBtn.setOnClickListener(v ->{
+                        infoBottomSheet.setVisibility(View.GONE);
+                        calculateDirections(position);
+                    });
 
                     //Handling navigation button click
                     navigationBtn.setOnClickListener(v -> {
@@ -384,9 +385,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             return;
         }
         mFusedLocationProviderClient.getLastLocation()
-                .addOnCompleteListener(new OnCompleteListener<Location>() {
+                .addOnCompleteListener(new OnCompleteListener<android.location.Location>() {
                     @Override
-                    public void onComplete(@NonNull Task<Location> task) {
+                    public void onComplete(@NonNull Task<android.location.Location> task) {
                         if (task.isSuccessful()) {
                             mLastKnownLocation = task.getResult();
                             if (mLastKnownLocation != null) {
@@ -433,7 +434,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private void calculateDirections(Integer index){
         progressDialog.setMessage("Looking  for possible routes...");
-        progressDialog.show();
+
+        if (this.getWindow().getDecorView().isShown()) {
+            progressDialog.show();
+        }
 
         Log.d("mytag", "calculateDirections: calculating directions.");
 
@@ -667,10 +671,27 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 public void run() {
                     rippleBg.stopRippleAnimation();
                     getNearestMarkerFromCurrentLocation(locations, currentMarkerLocation);
-
                 }
             }, 3000);
         }
 
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if ( progressDialog!=null && progressDialog.isShowing())
+        {
+            progressDialog.dismiss();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if ( progressDialog!=null && progressDialog.isShowing())
+        {
+            progressDialog.dismiss();
+        }
     }
 }

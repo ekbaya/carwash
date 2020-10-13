@@ -2,14 +2,14 @@ package com.example.carwashplaces.models;
 
 import java.util.HashMap;
 
-public class ModelLocation extends HashMap<String, String> {
+public class Location extends HashMap<String, String> {
     private String name, staff, latitude, longitude, id, phone, comment;
 
-    public ModelLocation() {
+    public Location() {
 
     }
 
-    public ModelLocation(String name, String staff, String latitude, String longitude, String id, String phone, String comment) {
+    public Location(String name, String staff, String latitude, String longitude, String id, String phone, String comment) {
         this.name = name;
         this.staff = staff;
         this.latitude = latitude;
