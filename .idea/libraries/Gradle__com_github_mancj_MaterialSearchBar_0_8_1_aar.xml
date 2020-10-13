@@ -1,8 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: com.github.mancj:MaterialSearchBar:0.8.1@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/93870fbe4c5d8f891e4578a94545888a/jetified-MaterialSearchBar-0.8.1/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/93870fbe4c5d8f891e4578a94545888a/jetified-MaterialSearchBar-0.8.1/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/193657ce012fc760f6aca072c0f73037/jetified-MaterialSearchBar-0.8.1/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/193657ce012fc760f6aca072c0f73037/jetified-MaterialSearchBar-0.8.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/193657ce012fc760f6aca072c0f73037/jetified-MaterialSearchBar-0.8.1/res" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.mancj/MaterialSearchBar/0.8.1/291d485d6e1451cc41853b5cdd4c023fc320679d/MaterialSearchBar-0.8.1-javadoc.jar!/" />

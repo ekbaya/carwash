@@ -14,13 +14,13 @@
         android:theme="@style/AppTheme">
 
         <meta-data android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBozgdcoXc0xTs3jcqUvx4oJIh2af1tjuY"/>
+            android:value="@string/google_maps_api_key"/>
 
         <activity
-            android:name=".MapActivity"
+            android:name=".views.MapActivity"
             android:label="@string/title_activity_map"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity android:name=".PermissionActivity">
+            android:theme="@style/AppTheme" />
+        <activity android:name=".views.PermissionActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
